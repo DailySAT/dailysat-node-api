@@ -1,0 +1,51 @@
+{
+  "name": "scholary_backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc && node dist/src/server.js",
+    "start": "node dist/src/server.js",
+    "build": "tsc",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate"
+  },
+  "keywords": [],
+  "author": "Hemit Patel",
+  "license": "MIT",
+  "description": "The official API for the Scholary platform",
+  "dependencies": {
+    "@prisma/client": "^5.17.0",
+    "axios": "^1.7.3",
+    "bcrypt": "^5.1.1",
+    "connect-redis": "^7.1.1",
+    "csurf": "^1.10.0",
+    "drizzle-orm": "^0.33.0",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "fs": "^0.0.1-security",
+    "install": "^0.13.0",
+    "ioredis": "^5.4.1",
+    "nodemailer": "^6.9.14",
+    "nodemailer-sendgrid": "^1.0.3",
+    "npm": "^10.8.2",
+    "path": "^0.12.7",
+    "pg": "^8.12.0",
+    "prisma": "^5.17.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/csurf": "^1.11.5",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.0",
+    "@types/node": "^22.0.0",
+    "@types/nodemailer": "^6.4.15",
+    "@types/nodemailer-sendgrid": "^1.0.3",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.6",
+    "typescript": "^5.5.4"
+  }
+}
