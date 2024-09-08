@@ -39,3 +39,4 @@ This includes code that will be run before any other logic within an endpoint so
 # 📝 Endpoint Docs:
 
 To find out the diffrent endpoints + their intended use-cases, please navigate to the route `/api-docs`
+# dailysat-api
