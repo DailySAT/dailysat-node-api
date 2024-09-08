@@ -260,6 +260,23 @@ const router = express.Router();
  */
 
 
+/**
+ * @swagger
+ *  /auth/check-session:
+ *    get:
+ *      summary: Checking session for client-side
+ *      tags: [authentication]
+ *      responses:
+ *        200:
+ *          description: User authenticated successfully
+ *        500:
+ *          description: An error occured
+ *        401: 
+ *          description: User is NOT authenticated and show different UI screen (giving a success false attribute)
+ */
+
+
+
 router.post('/register', authController.registerEmail);
 router.post('/login', authController.loginEmail);
 router.post('/logout', authController.logOut);
@@ -267,5 +284,6 @@ router.post('/generate-code', authController.generateCode)
 router.post('/reset-password', authController.resetPassword)
 router.post('/verify', authController.verifyEmail)
 router.get('/oauth/google', authController.googleSSO)
+router.get('/check-session', authController.checkSession)
 
 export default router;

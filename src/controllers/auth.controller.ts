@@ -391,8 +391,31 @@ const authController = {
                 });
             }
         }
-    }
-};
-
+    }, 
+    checkSession: async (req: Request, res: Response) => {
+        try {
+            // Checking if a session which contains user data exists
+            if (!req.session.user) {
+                // Set the status first, then send the response
+                return res.status(401).json({ success: false });
+            } else {
+                // Set the status first, then send the response
+                return res.status(200).json({ success: true });
+            }
+    
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                return res.status(500).json({
+                    message: 'Internal Server Error',
+                    error: error.message,
+                });
+            } else {
+                return res.status(500).json({
+                    message: 'Internal Server Error',
+                });
+            }
+        }
+    }    
+}
 export default authController;
     
