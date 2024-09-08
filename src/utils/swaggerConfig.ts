@@ -4,13 +4,13 @@ const options = {
   swaggerDefinition: {
     openapi: "3.0.0",
     info: {
-      title: "Scholarly API",
+      title: "DailySat API",
       version: "1.0.0",
       description: "The official version API",
     },
     servers: [
       {
-        url: "http://localhost:3000",
+        url: "http://localhost:3001",
       },
     ],
   },
