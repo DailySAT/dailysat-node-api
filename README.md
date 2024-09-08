@@ -1,15 +1,11 @@
-# 🧐 Scholary API
+# 🧐 DailySAT API
 
-Overview: The Scholary API enables the backend of the web-platform Scholary which is written in ReactJS and TypeScript using ViteJS buildpack.
-
-# Purpose of Scholary
-
-Scholary aims to create a platform for the management of course and teacher ratings for high schools. It provides endpoints for students to rate courses and teachers, and for the public to view these ratings which will aid high school students during back-to-school season.
+Overview: The DailySat API enables the backend of the web-platform DailySat which is written in ReactJS and TypeScript using ViteJS buildpack.
 
 # 💻 Technologies used:
 
 - ### Drizzle ORM
-Drizzle acts as an ORM but also a query builder which brings mid-level abstraction from SQL code, meaning it is much more performant. The only issue with this setup is the developers are expected to have knowledge within SQL which is a fair trade in the Scholary developers opinons. Reference this video for more information: [YouTube Video](https://www.youtube.com/watch?v=b8W4bupOmxw)
+Drizzle acts as an ORM but also a query builder which brings mid-level abstraction from SQL code, meaning it is much more performant. The only issue with this setup is the developers are expected to have knowledge within SQL which is a fair trade in the DailySat developers opinons. Reference this video for more information: [YouTube Video](https://www.youtube.com/watch?v=b8W4bupOmxw)
 
 - ### NodeJS with TSC
 NodeJS is a runtime environment for the JavaScript programming language. Through NodeJS, you can employ JavaScript code to run server-side which allows all your code from the web-app to the API to be within the same programming language, lifting the developer experience. Additionally, it's asynchronous features and promises add to the value/appeal of NodeJS as a framework! TSC is the TypeScript complier for NodeJS as TypeScript is not natively supported!
