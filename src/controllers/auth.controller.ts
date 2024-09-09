@@ -1,12 +1,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import crypto from 'crypto';
 import { cluster } from '../libs/redis.js';
-import { html, transporter } from '../libs/nodeMailerConfig.js';
-import axios from 'axios';
 import { db } from '../utils/db.js';
 import { user } from '../schema.js';
 import { and, eq } from 'drizzle-orm';
+import { generateCode } from '../libs/generateCode.js';
 
 const saltRounds = 10;
 
@@ -43,6 +41,9 @@ const authController = {
                     isVerified: false
                 })
                 .execute(); // Execute the insertion
+            
+            // Generate a code
+            await generateCode(email, 'verify')
 
             // Send response
             res.status(201).json({
@@ -87,7 +88,7 @@ const authController = {
 
             if (!userObject.isVerified) {
                 return res.status(401).json({
-                    message: 'User is not verified yet. Please check your email',
+                    message: 'User is not verified yet. Verify your email and check your email.',
                     error: 'invalid-verification'
                 });
             }
@@ -116,66 +117,6 @@ const authController = {
                 });
             } else {
                 return res.status(500).json({
-                    message: 'Internal Server Error',
-                });
-            }
-        }
-    },
-
-    googleSSO: async (req: Request, res: Response) => {
-        const { token: socialToken } = req.body;
-
-        try {
-            let response = await axios.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${socialToken}`);
-            if (response.data.error || !response.data.email) {
-                return res.status(500).json({
-                    message: 'Invalid Google token, use another one please!',
-                    error: 'invalid-token'
-                });
-            }
-
-            const userFromDB = await db
-                .select()
-                .from(user)
-                .where(eq(user.email, response.data.email))
-                .limit(1)
-                .execute(); // Execute the query
-
-            const userDBObj = userFromDB[0];
-
-            if (userDBObj) {
-                // User exists, so just assign session
-                req.session.user = { email: response.data.email };
-            } else {
-                // User does not exist, so create a new one in the db and then assign session
-                const newUser = await db
-                    .insert(user)
-                    .values({
-                        name: response.data.name,
-                        email: response.data.email, // Fixed typo here
-                        isVerified: false
-                    })
-                    .returning({
-                        email: user.email
-                    })
-                    .execute(); // Execute the insertion
-
-                const newUserObj = newUser[0];
-                req.session.user = { email: newUserObj.email || "" };
-            }
-
-            res.status(200).json({
-                message: 'User successfully authenticated via Google SSO'
-            });
-
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: error.message,
-                });
-            } else {
-                res.status(500).json({
                     message: 'Internal Server Error',
                 });
             }
@@ -228,70 +169,32 @@ const authController = {
     generateCode: async (req: Request, res: Response) => {
         const { email, type } = req.body;
 
-        try {
-            const foundUser = await db
-                .select()
-                .from(user)
-                .where(eq(user.email, email))
-                .limit(1)
-                .execute(); // Execute the query
+        await generateCode(email, type)
 
-            const userObject = foundUser[0];
+        const userFromDB = await db
+            .select()
+            .from(user)
+            .where(eq(user.email, email))
+            .limit(1)
+            .execute(); // Execute the query
 
-            if (!userObject) {
-                return res.status(500).json({
-                    message: "There is no such user. Invalid email provided",
-                    error: "no-user-exist"
-                });
-            }
-
-            if (type !== 'verify' && type !== 'reset') {
-                return res.status(400).json({
-                    message: "Type is incorrect. It can only be verify or reset. Please change your request",
-                    error: "wrong-value-type"
-                });
-            }
-
-            if (type === 'verify' && userObject.isVerified) {
-                return res.status(500).json({
-                    message: "You are already verified. No need for another verification code",
-                    error: "already-verified-spam"
-                });
-            }
-
-            // Generate a random integer between 1000 and 9999
-            const token = crypto.randomInt(1000, 10000);
-            const tokenString = token.toString();
-            const tokenList = Array.from(tokenString); // Convert string to array of characters
-
-            // Put token into Redis with email as key, and set expiration to 5 minutes
-            await cluster.setex(`${type}:${email}`, 300, token.toString());
-            const htmlCode = await html(userObject.name, tokenList, type);
-
-            // Send email
-            await transporter.sendMail({
-                from: "hemitvpatel@gmail.com",
-                to: email,
-                subject: `Your ${type} code`,
-                html: htmlCode
-            });
-
-            res.status(200).json({
-                message: "Token is sent to the user"
-            });
-
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: error.message,
-                });
-            } else {
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                });
-            }
+        if (!userFromDB) {
+            return res.status(400).json({
+                message: "There is no such user. Invalid email provided",
+                error: "no-user-exist"
+            })
         }
+
+        if (type !== "verify" || type !== "reset") {
+            return res.status(500).json({
+                message: "The type is invaild. It must be verify or reset",
+                error: "no-valid-type"
+            })
+        }
+
+        return res.json({
+            message: "Token is sent to the user"   
+        })
     },
 
     verifyEmail: async (req: Request, res: Response) => {
@@ -397,7 +300,7 @@ const authController = {
             // Checking if a session which contains user data exists
             if (!req.session.user) {
                 // Set the status first, then send the response
-                return res.status(401).json({ success: false });
+                return res.status(200).json({ success: false });
             } else {
                 // Set the status first, then send the response
                 return res.status(200).json({ success: true });

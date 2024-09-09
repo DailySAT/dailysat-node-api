@@ -25,11 +25,14 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 // JSON middleware so that we can pass JSON data from frontend
 app.use(express.json());
 
-// Added CORS so API service can be accessed
-app.use(cors())
-
+// Dotenv added so env can be accessed
 dotenv.configDotenv()
 
+// CORS so API can be accessed
+app.use(cors({
+    origin: process.env.FRONTEND_URL, 
+    credentials: true
+}));
 // Session middleware to allow us to use Session-based auth
 app.use(session({
     name: "session-id",

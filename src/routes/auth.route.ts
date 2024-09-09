@@ -283,7 +283,6 @@ router.post('/logout', authController.logOut);
 router.post('/generate-code', authController.generateCode)
 router.post('/reset-password', authController.resetPassword)
 router.post('/verify', authController.verifyEmail)
-router.get('/oauth/google', authController.googleSSO)
 router.get('/check-session', authController.checkSession)
 
 export default router;
