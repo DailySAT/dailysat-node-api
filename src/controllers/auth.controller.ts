@@ -79,16 +79,16 @@ const authController = {
 
             // Make sure user is not null (meaning there is no record of it in the db)
             if (!userObject) {
-                return res.status(403).json({
-                    message: "User email is not verified. Please try again once verified",
-                    error: "no-verification"
+                return res.status(401).json({
+                    message: "There is no such user in our db system",
+                    error: "no-err-user"
                 });
             }
 
             if (!userObject.isVerified) {
                 return res.status(401).json({
-                    message: 'Invalid email or password. This could be because the user does not exist or is not verified yet',
-                    error: 'invalid-account-error'
+                    message: 'User is not verified yet. Please check your email',
+                    error: 'invalid-verification'
                 });
             }
 

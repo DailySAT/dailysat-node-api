@@ -7,6 +7,9 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerSpecs from './utils/swaggerConfig.js';
 import session from 'express-session'
 import { cluster } from './libs/redis.js';
+import cors from 'cors';
+
+
 const PORT = 3001;
 const app = express();
 
@@ -21,6 +24,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // JSON middleware so that we can pass JSON data from frontend
 app.use(express.json());
+
+// Added CORS so API service can be accessed
+app.use(cors())
 
 dotenv.configDotenv()
 
