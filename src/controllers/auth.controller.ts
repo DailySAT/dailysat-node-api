@@ -5,6 +5,7 @@ import { db } from '../utils/db.js';
 import { user } from '../schema.js';
 import { and, eq } from 'drizzle-orm';
 import { generateCode } from '../libs/generateCode.js';
+import handleError from '../libs/handleError.js';
 
 const saltRounds = 10;
 
@@ -43,24 +44,14 @@ const authController = {
                 .execute(); // Execute the insertion
             
             // Generate a code
-            await generateCode(email, 'verify')
+            await generateCode(email, 'verify');
 
             // Send response
             res.status(201).json({
                 message: 'User registered successfully',
             });
-        } catch (error: unknown) {
-            // Check if error is an instance of Error
-            if (error instanceof Error) {
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: error.message,
-                });
-            } else {
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                });
-            }
+        } catch (error) {
+            handleError(res, error);
         }
     },
 
@@ -108,18 +99,8 @@ const authController = {
                     error: 'invalid-credentials'
                 });
             }
-        } catch (error: unknown) {
-            // Check if error is an instance of Error
-            if (error instanceof Error) {
-                return res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: error.message,
-                });
-            } else {
-                return res.status(500).json({
-                    message: 'Internal Server Error',
-                });
-            }
+        } catch (error) {
+            handleError(res, error);
         }
     },
 
@@ -149,55 +130,63 @@ const authController = {
     deleteUser: async (req: Request, res: Response) => {
         const { email } = req.body;
 
-        if (req.session && req.session.user && req.session.user.email === email) {
-            await db
-                .delete(user)
-                .where(eq(user.email, email))
-                .execute(); // Execute the deletion
+        try {
+            if (req.session && req.session.user && req.session.user.email === email) {
+                await db
+                    .delete(user)
+                    .where(eq(user.email, email))
+                    .execute(); // Execute the deletion
 
-            res.status(200).json({
-                message: "User deleted successfully"
-            });
-        } else {
-            return res.status(401).json({
-                message: "You do not have access to update this user",
-                error: "no-auth-access"
-            });
+                res.status(200).json({
+                    message: "User deleted successfully"
+                });
+            } else {
+                return res.status(401).json({
+                    message: "You do not have access to update this user",
+                    error: "no-auth-access"
+                });
+            }
+        } catch (error) {
+            handleError(res, error);
         }
     },
 
     generateCode: async (req: Request, res: Response) => {
         const { email, type } = req.body;
 
-        await generateCode(email, type)
+        try {
+            await generateCode(email, type);
 
-        if (type !== "verify" && type !== "reset") {
-            return res.status(500).json({
-                message: "The type is invalid. It must be either 'verify' or 'reset'.",
-                error: "no-valid-type"
-            });
-        }
-
-        // Only need the user db object when generating a verification code, otherwise it is a wasted db call (effiency)
-        if (type === "verify") {
-            const userFromDB = await db
-            .select()
-            .from(user)
-            .where(eq(user.email, email))
-            .limit(1)
-            .execute(); // Execute the query
-
-            if (!userFromDB) {
-                return res.status(400).json({
-                    message: "There is no such user. Invalid email provided",
-                    error: "no-user-exist"
-                })
+            if (type !== "verify" && type !== "reset") {
+                return res.status(500).json({
+                    message: "The type is invalid. It must be either 'verify' or 'reset'.",
+                    error: "no-valid-type"
+                });
             }
+
+            // Only need the user db object when generating a verification code, otherwise it is a wasted db call (efficiency)
+            if (type === "verify") {
+                const userFromDB = await db
+                    .select()
+                    .from(user)
+                    .where(eq(user.email, email))
+                    .limit(1)
+                    .execute(); // Execute the query
+
+                if (userFromDB.length === 0) {
+                    return res.status(400).json({
+                        message: "There is no such user. Invalid email provided",
+                        error: "no-user-exist"
+                    });
+                }
+            }
+            
+            return res.json({
+                message: "Token is sent to the user"   
+            });
+        } catch (error) {
+            handleError(res, error);
         }
-        
-        return res.json({
-            message: "Token is sent to the user"   
-        })
     },
 
     verifyEmail: async (req: Request, res: Response) => {
@@ -237,17 +226,8 @@ const authController = {
                     });
                 }
             });
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: error.message,
-                });
-            } else {
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                });
-            }
+        } catch (error) {
+            handleError(res, error);
         }
     },
 
@@ -285,44 +265,23 @@ const authController = {
                     });
                 }
             });
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: error.message,
-                });
-            } else {
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                });
-            }
+        } catch (error) {
+            handleError(res, error);
         }
-    }, 
+    },
+
     checkSession: async (req: Request, res: Response) => {
         try {
             // Checking if a session which contains user data exists
             if (!req.session.user) {
-                // Set the status first, then send the response
                 return res.status(200).json({ success: false });
             } else {
-                // Set the status first, then send the response
                 return res.status(200).json({ success: true });
             }
-    
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                return res.status(500).json({
-                    message: 'Internal Server Error',
-                    error: error.message,
-                });
-            } else {
-                return res.status(500).json({
-                    message: 'Internal Server Error',
-                });
-            }
+        } catch (error) {
+            handleError(res, error);
         }
-    }    
+    }
 }
 
 export default authController;
-    
