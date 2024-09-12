@@ -5,53 +5,50 @@ dotenv.config();
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpecs from './utils/swaggerConfig.js';
-import session from 'express-session'
+import session from 'express-session';
 import { cluster } from './libs/redis.js';
 import cors from 'cors';
+import RedisStore from 'connect-redis';
 
-
+// Server configuration
 const PORT = 3001;
 const app = express();
 
-// Routers that have to be imported to serve the base route
+// Routers
 import indexRoutes from './routes/index.route.js'; 
-import authRoutes from './routes/auth.route.js'
-import RedisStore from 'connect-redis';
+import authRoutes from './routes/auth.route.js';
 
-// Middleware for the Swagger documentation which is generated with comments (see README for more info)
+// Middleware for Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
-
-// JSON middleware so that we can pass JSON data from frontend
+// JSON middleware
 app.use(express.json());
 
-// Dotenv added so env can be accessed
-dotenv.configDotenv()
-
-// CORS so API can be accessed
+// CORS middleware
 app.use(cors({
-    origin: process.env.FRONTEND_URL, 
+    origin: process.env.FRONTEND_URL,
     credentials: true
 }));
-// Session middleware to allow us to use Session-based auth
+
+// Session middleware
 app.use(session({
-    name: "session-id",
-    secret: process.env.SESSION_SECRET || '',
+    name: 'session-id',
+    secret: process.env.SESSION_SECRET || 'default_secret', // Make sure to set this in your environment
     store: new RedisStore({ client: cluster }),
     resave: false,
     saveUninitialized: false,
     cookie: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        httpOnly: true, // So only a server is able to access the cookie within request headers (no JS scripts)
+        secure: process.env.NODE_ENV === 'production', // Set to true in production
         maxAge: 1000 * 60 * 60 * 24 * 365 * 7,
     },
-}))
+}));
 
-// Middlewares to set up routing to a base route like / or /auth
+// Setup routing
 app.use('/', indexRoutes);
-app.use('/auth', authRoutes)
+app.use('/auth', authRoutes);
 
-// Run app
+// Start server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
