@@ -171,27 +171,30 @@ const authController = {
 
         await generateCode(email, type)
 
-        const userFromDB = await db
+        if (type !== "verify" && type !== "reset") {
+            return res.status(500).json({
+                message: "The type is invalid. It must be either 'verify' or 'reset'.",
+                error: "no-valid-type"
+            });
+        }
+
+        // Only need the user db object when generating a verification code, otherwise it is a wasted db call (effiency)
+        if (type === "verify") {
+            const userFromDB = await db
             .select()
             .from(user)
             .where(eq(user.email, email))
             .limit(1)
             .execute(); // Execute the query
 
-        if (!userFromDB) {
-            return res.status(400).json({
-                message: "There is no such user. Invalid email provided",
-                error: "no-user-exist"
-            })
+            if (!userFromDB) {
+                return res.status(400).json({
+                    message: "There is no such user. Invalid email provided",
+                    error: "no-user-exist"
+                })
+            }
         }
-
-        if (type !== "verify" || type !== "reset") {
-            return res.status(500).json({
-                message: "The type is invaild. It must be verify or reset",
-                error: "no-valid-type"
-            })
-        }
-
+        
         return res.json({
             message: "Token is sent to the user"   
         })
