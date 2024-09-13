@@ -18,10 +18,10 @@ const router = express.Router()
  *               properties:
  *                 name:
  *                   type: string
- *                   example: CycleVend API
+ *                   example: DailySAT API
  *                 author:
  *                   type: string
- *                   example: CycleVend Engineering Team
+ *                   example: DailySAT Engineering Team
  *                 date_created:
  *                   type: string
  *                   example: July 28 2024

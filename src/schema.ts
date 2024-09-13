@@ -1,13 +1,26 @@
-import { serial, text, timestamp, pgTable, boolean } from "drizzle-orm/pg-core";
+import { serial, text, timestamp, pgTable, boolean, integer } from "drizzle-orm/pg-core";
 
-// Defined a schema that includes all the columns within our api
-
+// User table schema remains the same
 export const user = pgTable("user", {
-  id: serial('id').primaryKey(),
-  email: text("email"),
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
   name: text("name").notNull(),
-  password: text("password"),
-  isVerified: boolean('isVerified').notNull(),
+  password: text("password").notNull(),
+  isVerified: boolean("is_verified").notNull(),
+  createdAt: timestamp("created_at"),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const post = pgTable("post", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),                
+  body: text("body").notNull(),                  
+  userId: text("user_id").references(() => user.email), 
+  optionA: text("option_a").notNull(),            
+  optionB: text("option_b").notNull(),          
+  optionC: text("option_c").notNull(),            
+  optionD: text("option_d").notNull(),           
+  correctAnswer: text("correct_answer").notNull(), 
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
 });
