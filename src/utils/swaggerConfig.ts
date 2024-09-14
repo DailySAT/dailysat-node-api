@@ -10,7 +10,10 @@ const options = {
     },
     servers: [
       {
-        url: ["http://localhost:3001", "https://api.dailysat.tech"],
+        url: "http://localhost:3001",
+      },
+      {
+        url: "https://api.dailysat.tech",
       },
     ],
   },
@@ -19,4 +22,4 @@ const options = {
 
 const specs = swaggerJsDoc(options);
 
-export default specs ;
+export default specs;
