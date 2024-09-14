@@ -38,21 +38,20 @@ const router = express.Router();
  *                  message:
  *                    type: string
  *                    example: User registered successfully
- *                  userObj:
- *                    type: object
- *                    properties:
- *                      email:
- *                        type: string
- *                        format: email
- *                        example: user@cyclevend.com
- *                      name:
- *                        type: string
- *                        example: newuser
- *                      password:
- *                        type: string
- *                        example: hashedpassword123
+ *        400:
+ *          description: Email already in use
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: Email already in use
+ *                  error:
+ *                    type: string
+ *                    example: email-in-use
  */
-
 
 /**
  * @swagger
@@ -95,8 +94,10 @@ const router = express.Router();
  *                  message:
  *                    type: string
  *                    example: Invalid email or password
+ *                  error:
+ *                    type: string
+ *                    example: invalid-credentials
  */
-
 
 /**
  * @swagger
@@ -130,7 +131,6 @@ const router = express.Router();
  *                    example: no-session-id
  */
 
-
 /**
  * @swagger
  *  /auth/generate-code:
@@ -148,6 +148,9 @@ const router = express.Router();
  *                  type: string
  *                  format: email
  *                  example: user@cyclevend.com
+ *                type:
+ *                  type: string
+ *                  example: verify
  *      responses:
  *        200:
  *          description: Token is sent to the user
@@ -205,13 +208,14 @@ const router = express.Router();
  *                  example: 1234
  *                email:
  *                  type: string
+ *                  format: email
  *                  example: user@cyclevend.com
  *                newPassword:
  *                  type: string
  *                  example: coolnewpassword123
  *      responses:
  *        200:
- *          description: User's password was sucessfully reset
+ *          description: User's password was successfully reset
  *          content:
  *            application/json:
  *              schema:
@@ -219,7 +223,7 @@ const router = express.Router();
  *                properties:
  *                  message:
  *                    type: string
- *                    example: User has changed their password sucessfully
+ *                    example: User has changed their password successfully
  *        401:
  *          description: The code given was not valid due to it not existing, expiring or not belonging to the proper email user id
  *          content:
@@ -233,6 +237,95 @@ const router = express.Router();
  *                  error:
  *                    type: string
  *                    example: invalid-code-error
+ */
+
+/**
+ * @swagger
+ *  /auth/verify:
+ *    post:
+ *      summary: Verify the user's email with a code
+ *      tags: [authentication]
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                email:
+ *                  type: string
+ *                  format: email
+ *                  example: user@cyclevend.com
+ *                code:
+ *                  type: string
+ *                  example: 1234
+ *      responses:
+ *        200:
+ *          description: User's email has been verified
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: User's email has been verified! They may log in now.
+ *        401:
+ *          description: Code is not valid
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: Code is not valid, please input better code
+ *                  error:
+ *                    type: string
+ *                    example: invalid-code-error
+ */
+
+/**
+ * @swagger
+ *  /auth/delete:
+ *    post:
+ *      summary: Delete a user account
+ *      tags: [authentication]
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                email:
+ *                  type: string
+ *                  format: email
+ *                  example: user@cyclevend.com
+ *      responses:
+ *        200:
+ *          description: User deleted successfully
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: User deleted successfully
+ *        401:
+ *          description: Unauthorized
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *                    example: You do not have access to update this user
+ *                  error:
+ *                    type: string
+ *                    example: no-auth-access
  */
 
 /**
@@ -259,7 +352,6 @@ const router = express.Router();
  *                    example: invalid-token
  */
 
-
 /**
  * @swagger
  *  /auth/check-session:
@@ -269,13 +361,19 @@ const router = express.Router();
  *      responses:
  *        200:
  *          description: User authenticated successfully
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  success:
+ *                    type: boolean
+ *                    example: true
  *        500:
- *          description: An error occured
- *        401: 
- *          description: User is NOT authenticated and show different UI screen (giving a success false attribute)
+ *          description: An error occurred
+ *        401:
+ *          description: User is NOT authenticated
  */
-
-
 
 router.post('/register', authController.registerEmail);
 router.post('/login', authController.loginEmail);
