@@ -8,7 +8,7 @@ const router = express.Router();
  * @swagger
  *  /auth/register:
  *    post:
- *      summary: Register a new user to CycleVend's PostgreSQL database
+ *      summary: Register a new user to Dailysat's PostgreSQL database
  *      tags: [authentication]
  *      requestBody:
  *        required: true
@@ -20,7 +20,7 @@ const router = express.Router();
  *                email:
  *                  type: string
  *                  format: email
- *                  example: user@cyclevend.com
+ *                  example: user@dailysat.com
  *                name:
  *                  type: string
  *                  example: newuser
@@ -69,7 +69,7 @@ const router = express.Router();
  *                email:
  *                  type: string
  *                  format: email
- *                  example: user@cyclevend.com
+ *                  example: user@dailysat.com
  *                password:
  *                  type: string
  *                  example: supersecretpassword123
@@ -147,7 +147,7 @@ const router = express.Router();
  *                email:
  *                  type: string
  *                  format: email
- *                  example: user@cyclevend.com
+ *                  example: user@dailysat.com
  *                type:
  *                  type: string
  *                  example: verify
@@ -209,7 +209,7 @@ const router = express.Router();
  *                email:
  *                  type: string
  *                  format: email
- *                  example: user@cyclevend.com
+ *                  example: user@dailysat.com
  *                newPassword:
  *                  type: string
  *                  example: coolnewpassword123
@@ -255,7 +255,7 @@ const router = express.Router();
  *                email:
  *                  type: string
  *                  format: email
- *                  example: user@cyclevend.com
+ *                  example: user@dailysat.com
  *                code:
  *                  type: string
  *                  example: 1234
@@ -301,7 +301,7 @@ const router = express.Router();
  *                email:
  *                  type: string
  *                  format: email
- *                  example: user@cyclevend.com
+ *                  example: user@dailysat.com
  *      responses:
  *        200:
  *          description: User deleted successfully
