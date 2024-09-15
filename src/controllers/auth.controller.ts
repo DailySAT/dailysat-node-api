@@ -39,7 +39,8 @@ const authController = {
                     name,
                     email,
                     password: hash,
-                    isVerified: false
+                    isVerified: false,
+                    admin: false
                 })
                 .execute(); // Execute the insertion
             
@@ -89,7 +90,7 @@ const authController = {
 
             if (match) {
                 // Set user session if match is true
-                req.session.user = { email: userObject.email || "" };
+                req.session.user = { email: userObject.email || "", admin: userObject.admin };
                 return res.status(200).json({
                     message: 'Login successful',
                 });

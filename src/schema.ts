@@ -7,6 +7,7 @@ export const user = pgTable("user", {
   name: text("name").notNull(),
   password: text("password").notNull(),
   isVerified: boolean("is_verified").notNull(),
+  admin: boolean("admin").notNull(),
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
 });
