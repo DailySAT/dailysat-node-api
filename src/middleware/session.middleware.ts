@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from 'express'
 
-const authenticateSession = (req: Request, res: Response, next: NextFunction) => {
+export const authenticateSession = (req: Request, res: Response, next: NextFunction) => {
     if (req.session.user) {
         next()
     } else {
@@ -11,4 +11,13 @@ const authenticateSession = (req: Request, res: Response, next: NextFunction) =>
     }
 }
 
-export default authenticateSession
+export const authenticateAdminSession = (req: Request, res: Response, next: NextFunction) => {
+    if (req.session.user?.admin) {
+        next()
+    } else {
+        return res.status(401).json({
+            message: 'You are not an admin user',
+            error: 'no-admin-auth',
+        });
+    }
+}
