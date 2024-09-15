@@ -10,7 +10,7 @@ const router = express.Router()
  *     summary: The default endpoint for when API is first accessed
  *     responses:
  *       200:
- *         description: A JSON object with different information about CycleVend backend
+ *         description: A JSON object with different information about DailySAT backend
  *         content:
  *           application/json:
  *             schema:
