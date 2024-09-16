@@ -45,7 +45,6 @@ app.use(session({
     },
     genid: (req) => {
         const email = req.body.email || 'default_email'; // Use a default value if email is not provided
-        console.log(`Generating session ID for email: ${email}`);
         const hmac = crypto.createHmac('sha256', process.env.SECRET_KEY || 'default');
         hmac.update(email);
         return hmac.digest('hex');
