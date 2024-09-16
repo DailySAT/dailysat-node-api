@@ -19,9 +19,6 @@ import indexRoutes from './routes/index.route.js';
 import authRoutes from './routes/auth.route.js';
 import questionRoute from './routes/questions.route.js';
 
-// Middleware for Swagger documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-
 // JSON middleware
 app.use(express.json());
 
@@ -55,6 +52,9 @@ app.use(session({
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
 app.use('/questions', questionRoute);
+
+// Route for api docs from Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Start server
 app.listen(PORT, () => {
