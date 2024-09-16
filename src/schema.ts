@@ -2,8 +2,7 @@ import { serial, text, timestamp, pgTable, boolean, integer } from "drizzle-orm/
 
 // User table schema remains the same
 export const user = pgTable("user", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull(),
+  email: text("email").notNull().primaryKey(),
   name: text("name").notNull(),
   password: text("password").notNull(),
   isVerified: boolean("is_verified").notNull(),
