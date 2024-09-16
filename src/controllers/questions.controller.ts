@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { db } from '../utils/db.js';
 import { post } from '../schema.js';
 import { eq } from 'drizzle-orm';
+import handleError from '../libs/handleError.js'
 
 const questionController = {
     postQuestion: async (req: Request, res: Response) => {
@@ -36,11 +37,7 @@ const questionController = {
                 data: result,
             });
         } catch (error: any) {
-            console.error('Error posting question:', error);
-            res.status(500).json({
-                message: 'Failed to post question',
-                error: error.message,
-            });
+            handleError(res,error)
         }
     },
     getUserQuestion: async (req: Request, res: Response) => {
@@ -65,11 +62,7 @@ const questionController = {
                 data: result,
             });
         } catch (error: any) {
-            console.error('Error retrieving questions:', error);
-            res.status(500).json({
-                message: 'Failed to retrieve questions',
-                error: error.message,
-            });
+            handleError(res,error)
         }
     }
     
