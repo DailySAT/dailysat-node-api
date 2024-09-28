@@ -6,12 +6,12 @@ const router = express.Router();
 
 /**
  * @swagger
- * /search:
+ * /questions:
  *   post:
  *     summary: Post a new question
  *     description: Create a new question and save it to the database.
  *     tags:
- *       - [questions]
+ *       - questions
  *     requestBody:
  *       description: The question to be created.
  *       required: true
@@ -51,9 +51,35 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
+ *                   example: Question posted successfully
  *                 data:
  *                   type: object
  *                   description: The created question data.
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     title:
+ *                       type: string
+ *                     body:
+ *                       type: string
+ *                     userId:
+ *                       type: string
+ *                     optionA:
+ *                       type: string
+ *                     optionB:
+ *                       type: string
+ *                     optionC:
+ *                       type: string
+ *                     optionD:
+ *                       type: string
+ *                     correctAnswer:
+ *                       type: string
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
  *       500:
  *         description: Failed to post question
  *         content:
@@ -63,29 +89,31 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
+ *                   example: Internal Server Error
  *                 error:
  *                   type: string
+ *                   example: Error details
  * 
  */
 
 /**
  * @swagger
- * /search/user:
+ * /questions/random:
  *   post:
- *     summary: Get questions for a specific user
- *     description: Retrieve all questions associated with the provided email.
+ *     summary: Get a random question from a specific topic
+ *     description: Retrieve a random question associated with the provided topic.
  *     tags:
- *       - [questions]
+ *       - questions
  *     parameters:
  *       - in: query
- *         name: email
+ *         name: topic
  *         required: true
  *         schema:
  *           type: string
- *           description: The email of the user whose questions are to be retrieved.
+ *           description: The topic for which a random question is to be retrieved.
  *     responses:
  *       200:
- *         description: Questions retrieved successfully
+ *         description: Question retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -93,14 +121,19 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
+ *                   example: Questions retrieved successfully
  *                 data:
  *                   type: array
  *                   items:
  *                     type: object
  *                     properties:
+ *                       id:
+ *                         type: string
  *                       title:
  *                         type: string
  *                       body:
+ *                         type: string
+ *                       userId:
  *                         type: string
  *                       optionA:
  *                         type: string
@@ -112,8 +145,14 @@ const router = express.Router();
  *                         type: string
  *                       correctAnswer:
  *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
  *       400:
- *         description: Email is required
+ *         description: Topic is required
  *         content:
  *           application/json:
  *             schema:
@@ -121,6 +160,7 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
+ *                   example: Topic is required
  *       500:
  *         description: Failed to retrieve questions
  *         content:
@@ -130,12 +170,14 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
+ *                   example: Internal Server Error
  *                 error:
  *                   type: string
+ *                   example: Error details
  * 
  */
 
 router.post("/", authenticateSession, questionController.postQuestion);
-router.post("/user", authenticateSession, questionController.getUserQuestion);
+router.post("/random", authenticateSession, questionController.getRandomQuestion);
 
 export default router;

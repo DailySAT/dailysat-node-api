@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { db } from '../utils/db.js';
-import { post } from '../schema.js';
-import { eq } from 'drizzle-orm';
+import { post, postTopic } from '../schema.js';
+import { eq, sql } from 'drizzle-orm';
 import handleError from '../libs/handleError.js'
 
 const questionController = {
@@ -40,27 +40,41 @@ const questionController = {
             handleError(res,error)
         }
     },
-    getUserQuestion: async (req: Request, res: Response) => {
-        const email = req.query.email as string;
+    getRandomQuestion: async (req: Request, res: Response) => {
+        const topic = req.query.topic as string;
     
         // Validate the email
-        if (!email) {
+        if (!topic) {
             return res.status(400).json({
                 message: 'Email is required',
             });
         }
     
         try {
-            // Fetch questions for the user from the database
-            const result = await db
+            // Get the type of questions + topics
+            const topicResult = await db
+                .select({
+                    id: postTopic.id
+                })
+                .from(postTopic)
+                .where(eq(postTopic.name, topic));
+
+            // Now use this to query the proper questions we want (from the same topic and whatnot)
+            // Ordered it randomly and limited to one result to get one random question at a time
+
+            const randomQuestion = await db 
                 .select()
                 .from(post)
-                .where(eq(post.userId, email)); // Assuming userEmail is the correct field
+                .where(eq(post.topicID, topicResult[0].id))
+                .orderBy(sql`RAND()`)
+                .limit(1);
+        
     
             res.status(200).json({
                 message: 'Questions retrieved successfully',
-                data: result,
+                data: randomQuestion,
             });
+
         } catch (error: any) {
             handleError(res,error)
         }
