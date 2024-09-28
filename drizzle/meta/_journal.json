@@ -8,6 +8,13 @@
       "when": 1726449054136,
       "tag": "0000_rainy_blob",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1727493622240,
+      "tag": "0001_dashing_sentinels",
+      "breakpoints": true
     }
   ]
 }
