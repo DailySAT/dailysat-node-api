@@ -7,7 +7,7 @@ export default defineConfig({
   schema: "./src/schema.ts",
   out: "./drizzle",
   dbCredentials: {
-    url: "postgres://hemitpatel:hemitpatel@localhost:5432/hemitpatel"
+    url: processs.env.DATABASE_URL
   },
   
 });
