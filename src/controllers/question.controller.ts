@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { db } from '../utils/db.js';
-import { post } from '../schema.js';
+import { editorial, post } from '../schema.js';
 import { eq, sql } from 'drizzle-orm';
 import handleError from '../libs/handleError.js';
 
@@ -35,6 +35,32 @@ const indexController = {
             });
         } catch (error) {
             handleError(res, error);
+        }
+    },
+    getEditorialReading: async (req: Request, res: Response) => {
+        try {
+            const {questionID} = req.query
+
+            // Ensure questionID is a valid number as the editorial foreign key is a numerical value!
+
+            const questionIdNumber = parseInt(questionID as string, 10);
+            if (isNaN(questionIdNumber)) {
+                throw new Error('Invalid questionID: must be a number');
+            }
+
+            const editorials = await db
+                .select()
+                .from(editorial)
+                .where(eq(editorial.questionId, questionIdNumber))
+                .execute();
+
+            res.json({
+                editorials,
+                message: "Sucessfully sent editorials"
+            })
+
+        } catch(err) {
+            handleError(res, err)
         }
     }
 };

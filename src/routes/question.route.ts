@@ -32,5 +32,6 @@ const router = express.Router()
  
 
 router.get("/get/reading", questionController.getReadingQuestions)
+router.get("/editorial/reading", questionController.getEditorialReading)
 
 export default router

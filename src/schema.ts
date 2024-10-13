@@ -1,3 +1,4 @@
+import { foreignKey } from "drizzle-orm/mysql-core";
 import { serial, text, timestamp, pgTable, boolean, integer, index } from "drizzle-orm/pg-core";
 
 // User table schema remains the same
@@ -26,4 +27,15 @@ export const post = pgTable("post", {
   return {
     topicIDIndex: index("topic_id_idx").on(table.topicID), // Create index for topicID (faster db retriveal)
   };
+});
+
+
+export const editorial = pgTable("editorial", {
+  id: serial("id").primaryKey(),
+  // Foriegn key that connects the question to the editorial
+  questionId: integer("question_id").notNull().references(() => post.id),
+  body: text("body").notNull(),
+
+  // Is optional so not .notNull()
+  reasoning: text("reasoning")
 });
