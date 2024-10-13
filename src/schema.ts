@@ -6,7 +6,6 @@ export const user = pgTable("user", {
   name: text("name").notNull(),
   password: text("password").notNull(),
   isVerified: boolean("is_verified").notNull(),
-  admin: boolean("admin").notNull(),
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
 });
@@ -15,8 +14,6 @@ export const user = pgTable("user", {
 export const post = pgTable("post", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
-  body: text("body").notNull(),
-  userId: text("user_id").references(() => user.email), // Foreign key to user
   optionA: text("option_a").notNull(),
   optionB: text("option_b").notNull(),
   optionC: text("option_c").notNull(),
@@ -24,16 +21,9 @@ export const post = pgTable("post", {
   correctAnswer: text("correct_answer").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-  topicID: integer("topic_id").references(() => postTopic.id), // Foreign key to topic
+  topicID: text("topic").notNull()
 }, (table) => {
   return {
-    userIdIndex: index("user_id_idx").on(table.userId),  // Create index for userId
-    topicIDIndex: index("topic_id_idx").on(table.topicID), // Create index for topicID
+    topicIDIndex: index("topic_id_idx").on(table.topicID), // Create index for topicID (faster db retriveal)
   };
-});
-
-// Post Topics Table
-export const postTopic = pgTable("post_topic", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
 });
