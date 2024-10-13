@@ -4,7 +4,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /:
+ * /questions/get/reading:
  *   get:
  *     summary: Get a random question from JSON file of questions
  *     responses:
@@ -29,7 +29,33 @@ const router = express.Router()
  *                   example: Let's change the world 🚀
  */
 
- 
+ /**
+ * @swagger
+ * /questions/editorial/reading:
+ *   get:
+ *     summary: Get a random question from JSON file of questions
+ *     responses:
+ *       200:
+ *         description: A JSON object with different information about DailySAT backend
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                   example: DailySAT API
+ *                 author:
+ *                   type: string
+ *                   example: DailySAT Engineering Team
+ *                 date_created:
+ *                   type: string
+ *                   example: July 28 2024
+ *                 message:
+ *                   type: string
+ *                   example: Let's change the world 🚀
+ */
+
 
 router.get("/get/reading", questionController.getReadingQuestions)
 router.get("/editorial/reading", questionController.getEditorialReading)
