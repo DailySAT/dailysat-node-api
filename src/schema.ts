@@ -2,7 +2,7 @@ import { serial, text, timestamp, pgTable, boolean, integer, index } from "drizz
 
 // User table schema remains the same
 export const user = pgTable("user", {
-  email: text("email").notNull().primaryKey(),
+  email: text("email").primaryKey(), // Make email the primary key
   name: text("name").notNull(),
   password: text("password").notNull(),
   isVerified: boolean("is_verified").notNull(),
@@ -10,7 +10,7 @@ export const user = pgTable("user", {
   updatedAt: timestamp("updated_at"),
 });
 
-// Post Table
+
 export const post = pgTable("post", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
