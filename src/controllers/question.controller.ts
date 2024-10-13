@@ -11,10 +11,10 @@ const indexController = {
 
             // Validate the type query parameter
             if (
-                type !== "comprehension" &&
-                type !== "analysis" &&
-                type !== "synthesis" &&
-                type !== "evaluation"
+                type !== "convention" &&
+                type !== "craft" &&
+                type !== "ideas" &&
+                type !== "information"
             ) {
                 return res.status(400).json({ message: "Invalid type specified." });
             }
