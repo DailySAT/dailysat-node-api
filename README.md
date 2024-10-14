@@ -1,37 +1,43 @@
+Here’s how you can embed the link in your README so that it displays directly:
+
+---
+
 # 🧐 DailySAT API
 
-Overview: The DailySat API enables the backend of the web-platform DailySat which is written in ReactJS and TypeScript using ViteJS buildpack.
+**Overview:** The DailySat API powers the backend of the DailySat web platform, developed with ReactJS and TypeScript using the ViteJS buildpack.
 
-# 💻 Technologies used:
+## 💻 Technologies Used:
 
-- ### Drizzle ORM
-Drizzle acts as an ORM but also a query builder which brings mid-level abstraction from SQL code, meaning it is much more performant. The only issue with this setup is the developers are expected to have knowledge within SQL which is a fair trade in the DailySat developers opinons. Reference this video for more information: [YouTube Video](https://www.youtube.com/watch?v=b8W4bupOmxw)
+### Drizzle ORM
+Drizzle serves as both an ORM and a query builder, providing a mid-level abstraction from SQL code for improved performance. Developers are expected to have SQL knowledge, which is considered a fair trade-off by the DailySat development team. For more information, check out this [YouTube Video](https://www.youtube.com/watch?v=b8W4bupOmxw).
 
-- ### NodeJS with TSC
-NodeJS is a runtime environment for the JavaScript programming language. Through NodeJS, you can employ JavaScript code to run server-side which allows all your code from the web-app to the API to be within the same programming language, lifting the developer experience. Additionally, it's asynchronous features and promises add to the value/appeal of NodeJS as a framework! TSC is the TypeScript complier for NodeJS as TypeScript is not natively supported!
+### NodeJS with TSC
+NodeJS is a runtime environment for JavaScript, enabling server-side execution of JavaScript code. This allows for a unified programming language across the web app and API, enhancing developer experience. Its asynchronous features and promise-based structure add to its appeal. TSC is the TypeScript compiler for NodeJS, as TypeScript is not natively supported.
 
-- ### Redis Clusters
-Redis is an in-memory database, meaning all the data is stored within the RAM of the server instanace. This means it is much faster than a tradional database like SQL or NoSQL options (MongoDB, Cassendra, etc) as it doesn't need to read off the disk. But, this also means it is prone to losing data whenever the server shuts down. This narrows the use-case for this technology to data that can be lost such as sessions or verification codes which is the use-case for it within this API. The clusters enables horizontal sharding which helps with scalability as that is a major concern when using session-based authentication. Refer to this video for more information: [YouTube Video](https://www.youtube.com/watch?v=2HvxYMdHYcY)
+### Redis Clusters
+Redis is an in-memory database, storing data in RAM for faster access compared to traditional databases like SQL or NoSQL (e.g., MongoDB, Cassandra). However, this also means it is susceptible to data loss on server shutdown, making it suitable for ephemeral data like sessions and verification codes. Clusters enable horizontal sharding, improving scalability, especially for session-based authentication. Refer to this [YouTube Video](https://www.youtube.com/watch?v=2HvxYMdHYcY) for more information.
 
-- ### Express Sessions
-This technology abstracts the session-based authentication logic from the developer which leads to a better developer experience. Additioanlly, it provides industry best practices in-terms of security and scalablilty.
+### Express Sessions
+This technology abstracts session-based authentication logic from developers, leading to improved developer experience and adhering to industry best practices for security and scalability.
 
-- ### Swagger
-This is used to provide API documentation very seamlessly
+### Swagger
+Swagger is used for seamless API documentation.
 
-# 🧱 API architecture:
+## 🧱 API Architecture:
 
-This API abstracts it's logic into 3 main folders:
+The API logic is structured into three main folders:
 
 - #### Controllers
-This has all the business logic such as db queries for your API endpoints
+Contains all business logic, including database queries for API endpoints.
 
 - #### Routes
-This has all the endpoints for a speific type of logic such as authentication 
+Includes all endpoints for specific logic types, such as authentication.
 
 - #### Middleware
-This includes code that will be run before any other logic within an endpoint so it is good for pre-processing requests. Beneificial within scenrios such as checking if a user is authenticated or not!
+Houses code that runs before any other logic in an endpoint, useful for pre-processing requests, such as checking user authentication.
 
-# 📝 Endpoint Docs:
+## 📝 Endpoint Docs:
 
-To find out the diffrent endpoints + their intended use-cases, please navigate to the route `/api-docs`
+To explore the different endpoints and their intended use cases, please navigate to the route `/api-docs`.
+
+[Database ER Diagram](https://drive.google.com/file/d/1Y9Yu9_crEV4aN3SZ9a_vSYKdIGGY7dxm/preview)

@@ -1,4 +1,3 @@
-import { foreignKey } from "drizzle-orm/mysql-core";
 import { serial, text, timestamp, pgTable, boolean, integer, index } from "drizzle-orm/pg-core";
 
 // User table schema remains the same
