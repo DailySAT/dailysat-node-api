@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 
 dotenv.config();
 
-const isDev = true
+const isDev = process.env.IS_DEV || false
 
 // Different configs set up for different environments: a development and a production
 
