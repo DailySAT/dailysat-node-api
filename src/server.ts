@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import { User } from './types/User.js';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpecs from './utils/swaggerConfig.js';
@@ -9,6 +10,8 @@ import { cluster } from './libs/redis.js';
 import cors from 'cors';
 import RedisStore from 'connect-redis';
 import crypto from 'crypto';
+import passport from 'passport'
+import {Strategy as GoogleStrategy} from 'passport-google-oauth2'
 
 // Server configuration
 const PORT = 3001;
@@ -18,6 +21,9 @@ const app = express();
 import indexRoutes from './routes/index.route.js'; 
 import authRoutes from './routes/auth.route.js';
 import questionRoutes from './routes/question.route.js'
+import { user } from './schema.js';
+import { eq } from 'drizzle-orm';
+import { db } from './utils/db.js';
 
 // JSON middleware
 app.use(express.json());
@@ -28,7 +34,7 @@ app.use(cors({
     credentials: true
 }));
 
-// Session middleware
+// Session middleware (config)
 app.use(session({
     name: 'session-id',
     secret: process.env.SESSION_SECRET || 'default_secret', // Make sure to set this in your environment
@@ -48,6 +54,72 @@ app.use(session({
     }
 }));
 
+// this allows passport to do its magic 
+app.use(passport.initialize())
+
+// this method is used to ensure that passport knows we are using sessions
+app.use(passport.authenticate('session'));
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID || "",
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    callbackURL: "http://localhost:3000/auth/google/callback",
+    passReqToCallback: true
+  },
+  async (
+    // even though we are not using these
+    // we need to declare them because these are the arugments for those values
+    request: Express.Request,
+    accessToken: string,
+    refreshToken: string,
+    profile: {
+      id: string;
+      displayName: string;
+      emails: { value: string }[];
+    },
+    done: (error: any, user?: User | null) => void
+  ) => {
+    try {
+      const existingUser = await db
+        .select()
+        .from(user)
+        .where(eq(user.googleId, profile.id))
+        .limit(1)
+        .execute();
+
+      if (existingUser.length > 0) {
+        return done(null, existingUser[0]);
+      } else {
+        const newUserData: User = {
+          name: profile.displayName,
+          email: profile.emails[0].value,
+          password: '', // Or handle as needed
+          googleId: profile.id,
+        };
+
+        // building a new db entry into our sql db 
+        await db
+            .insert(user)
+            .values(newUserData)
+            .execute()
+
+        // returning the existing user gotten from the google function
+        return done(null, existingUser[0]);
+      }
+    } catch (err) {
+      return done(err);
+    }
+  }
+));
+
+
+passport.serializeUser((user, done) => {
+    return done(null, user)
+})
+
+passport.deserializeUser((user, done) => {
+    return done(null, user as User);
+})
 // Setup routing
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);

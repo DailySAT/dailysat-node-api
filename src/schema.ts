@@ -5,9 +5,7 @@ export const user = pgTable("user", {
   email: text("email").primaryKey(), // Make email the primary key
   name: text("name").notNull(),
   password: text("password").notNull(),
-  isVerified: boolean("is_verified").notNull(),
-  createdAt: timestamp("created_at"),
-  updatedAt: timestamp("updated_at"),
+  googleId: text("googleId").notNull(),
 });
 
 

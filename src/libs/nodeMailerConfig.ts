@@ -1,7 +1,6 @@
 import nodeMailer from 'nodemailer';
 import nodemailerSendgrid from 'nodemailer-sendgrid';
-
-type ActionType = "verify" | "reset";
+import { ActionType } from '../types/ActionType.js';
 
 // Function to generate the HTML content for the email
 export const html = (name: string, token_list: string[], type: ActionType) => {
