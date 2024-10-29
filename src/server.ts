@@ -60,16 +60,21 @@ app.use(passport.initialize())
 // this method is used to ensure that passport knows we are using sessions
 app.use(passport.authenticate('session'));
 
+// making sure that we are using the correct http method when building our callback url
+const apiUrl = process.env.API_URL || "";
+const protocol = apiUrl.startsWith('https://') ? 'https' : 'http';
+
+const callbackURL = `${protocol}://${apiUrl}/auth/callback`;
+
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID || "",
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    callbackURL: "http://localhost:3000/auth/google/callback",
+    callbackURL: callbackURL,
     passReqToCallback: true
   },
   async (
     // even though we are not using these
     // we need to declare them because these are the arugments for those values
-    request: Express.Request,
     accessToken: string,
     refreshToken: string,
     profile: {

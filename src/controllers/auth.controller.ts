@@ -3,31 +3,37 @@ import { db } from '../utils/db.js';
 import { user } from '../schema.js';
 import { eq } from 'drizzle-orm';
 import handleError from '../libs/handleError.js';
+import passport from 'passport';
 
 const authController = {
+    login: async (req: Request, res: Response) => {
+        passport.authenticate('google', {scope: 'profile'})
+    },
+    callBack: async (req: Request, res: Response) => {
+        passport.authenticate('google', {failureMessage: "A failure has occured. Please email the DailySAT team"})
+    },
     logOut: (req: Request, res: Response) => {
-        if (!req.session) {
-            return res.status(500).json({
+        if (!req.isAuthenticated()) {
+            return res.status(400).json({
                 message: "User is not logged in and therefore cannot be logged out",
-                error: "no-session-id"
+                error: "not-authenticated"
             });
         }
-
-        req.session.destroy((err) => {
-            if (!err) {
-                res.status(200).json({
-                    message: "Logged user out and killed session from express-session and redis"
-                });
-            } else {
+    
+        req.logout((err) => {
+            if (err) {
                 console.error(err);
-                res.status(500).json({
+                return res.status(500).json({
                     message: "Error occurred while logging out",
                     error: err.message,
                 });
             }
+    
+            res.status(200).json({
+                message: "Successfully logged out"
+            });
         });
-    },
-
+    },    
     deleteUser: async (req: Request, res: Response) => {
         const { email } = req.body;
 
@@ -56,12 +62,12 @@ const authController = {
     checkSession: async (req: Request, res: Response) => {
         try {
             // Checking if a session which contains user data exists
-            if (!req.session.user) {
+            if (!req.user) {
                 return res.status(200).json({ success: false });
             } else {
                 return res.status(200).json({ 
                     success: true,
-                    session: req.session.user
+                    session: req.user
                 });
             }
         } catch (error) {
@@ -71,3 +77,5 @@ const authController = {
 }
 
 export default authController;
+
+
