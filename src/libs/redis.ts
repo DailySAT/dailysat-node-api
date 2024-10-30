@@ -1,31 +1,20 @@
-import Redis from 'ioredis'; // Ensure you have ioredis installed
-import dotenv from 'dotenv'
+import { Redis } from 'ioredis'; // Use named import so that we can construct a Redis object
+import dotenv from 'dotenv';
 
 dotenv.config();
 
-const isDev = process.env.IS_DEV || false
+const isDev = process.env.IS_DEV === 'true'; // Ensure this is a boolean
 
-// Different configs set up for different environments: a development and a production
+// Configuration for different environments
+const redisLocalOptions = {
+  host: '127.0.0.1',
+  port: 6379, // Default Redis port
+};
 
-const redisLocalOptions = 
-  [
-      { host: '127.0.0.1', port: 7001 },
-      { host: '127.0.0.1', port: 7002 },
-      { host: '127.0.0.1', port: 7003 },
-      { host: '127.0.0.1', port: 7004 },
-      { host: '127.0.0.1', port: 7005 },
-      { host: '127.0.0.1', port: 7006 },
-      { host: '127.0.0.1', port: 7007 },
-  ]
-;
+const redisProdOptions = {
+  host: process.env.AWS_CONFIG_ENDPOINT,
+  port: 6379, // Default Redis port
+};
 
-const redisProdOptions = 
-  [
-    {
-      host: process.env.AWS_CONFIG_ENDPOINT,
-      port: 6379, // Default Redis port, so therefore used by default within this app
-    },
-  ]
-;
-
-export const cluster = new Redis.Cluster(isDev ? redisLocalOptions : redisProdOptions);
+// Create a Redis client based on the environment
+export const redisClient = new Redis(isDev ? redisLocalOptions : redisProdOptions);

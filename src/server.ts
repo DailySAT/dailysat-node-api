@@ -6,7 +6,7 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpecs from './utils/swaggerConfig.js';
 import session from 'express-session';
-import { cluster } from './libs/redis.js';
+import { redisClient } from './libs/redis.js';
 import cors from 'cors';
 import RedisStore from 'connect-redis';
 import crypto from 'crypto';
@@ -39,7 +39,7 @@ app.use(cors({
 app.use(session({
     name: 'session-id',
     secret: process.env.SESSION_SECRET || 'default_secret', // Make sure to set this in your environment
-    store: new RedisStore({ client: cluster }),
+    store: new RedisStore({ client: redisClient }),
     resave: false,
     saveUninitialized: false,
     cookie: {
