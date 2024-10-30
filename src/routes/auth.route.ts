@@ -155,5 +155,7 @@ router.get('/login', authController.login)
 router.get('/callback', authController.callBack)
 router.post('/logout', authController.logOut);
 router.get('/check-session', authController.checkSession)
+router.get('/error', authController.error)
+router.get('/success', authController.success)
 
 export default router;

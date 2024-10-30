@@ -11,7 +11,11 @@ import cors from 'cors';
 import RedisStore from 'connect-redis';
 import crypto from 'crypto';
 import passport from 'passport'
+
 import {Strategy as GoogleStrategy} from 'passport-google-oauth2'
+import { db } from './utils/db.js';
+import { user } from './schema.js';
+import { eq } from 'drizzle-orm';
 
 // Server configuration
 const PORT = 3001;
@@ -21,9 +25,6 @@ const app = express();
 import indexRoutes from './routes/index.route.js'; 
 import authRoutes from './routes/auth.route.js';
 import questionRoutes from './routes/question.route.js'
-import { user } from './schema.js';
-import { eq } from 'drizzle-orm';
-import { db } from './utils/db.js';
 
 // JSON middleware
 app.use(express.json());
@@ -58,7 +59,7 @@ app.use(session({
 app.use(passport.initialize())
 
 // this method is used to ensure that passport knows we are using sessions
-app.use(passport.authenticate('session'));
+app.use(passport.session());
 
 // making sure that we are using the correct http method when building our callback url
 const apiUrl = process.env.API_URL || "";
@@ -66,6 +67,7 @@ const protocol = apiUrl.startsWith('https://') ? 'https' : 'http';
 
 const callbackURL = `${protocol}://${apiUrl}/auth/callback`;
 
+// this ensures that we can use the google sso login as it is now configured for use
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID || "",
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
@@ -98,7 +100,6 @@ passport.use(new GoogleStrategy({
         const newUserData: User = {
           name: profile.displayName,
           email: profile.emails[0].value,
-          password: '', // Or handle as needed
           googleId: profile.id,
         };
 
@@ -116,7 +117,6 @@ passport.use(new GoogleStrategy({
     }
   }
 ));
-
 
 passport.serializeUser((user, done) => {
     return done(null, user)

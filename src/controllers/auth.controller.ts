@@ -6,12 +6,43 @@ import handleError from '../libs/handleError.js';
 import passport from 'passport';
 
 const authController = {
-    login: async (req: Request, res: Response) => {
-        passport.authenticate('google', {scope: 'profile'})
+    login: (req: Request, res: Response) => {
+        passport.authenticate('google', { scope: ['profile', 'email'] })(req, res);
     },
+
     callBack: async (req: Request, res: Response) => {
-        passport.authenticate('google', {failureMessage: "A failure has occured. Please email the DailySAT team"})
+        passport.authenticate('google', { failureRedirect: '/auth/error' }, async (err: any, profile: any) => {
+            if (err || !profile) {
+                return res.redirect('/auth/google/error');
+            }
+
+            try {
+                // Check if the user already exists in the database
+                const existingUser = await db.select().from(user).where(eq(user.email, profile.emails[0].value)).execute();
+
+                if (existingUser.length > 0) {
+                    console.log('Google user already exists in DB..');
+                } else {
+                    console.log('Registering new Google user..');
+                    await db.insert(user).values({
+                        email: profile.emails[0].value,
+                        name: profile.displayName,
+                        googleId: profile.id
+                    }).execute();
+                }
+
+                req.login(profile, (loginErr) => {
+                    if (loginErr) {
+                        return res.status(500).json({ message: 'Login failed', error: loginErr.message });
+                    }
+                    res.redirect('/auth/success'); // Redirecting to success page
+                });
+            } catch (error) {
+                handleError(res, error);
+            }
+        })(req, res);
     },
+
     logOut: (req: Request, res: Response) => {
         if (!req.isAuthenticated()) {
             return res.status(400).json({
@@ -19,7 +50,7 @@ const authController = {
                 error: "not-authenticated"
             });
         }
-    
+
         req.logout((err) => {
             if (err) {
                 console.error(err);
@@ -28,12 +59,13 @@ const authController = {
                     error: err.message,
                 });
             }
-    
+
             res.status(200).json({
                 message: "Successfully logged out"
             });
         });
-    },    
+    },
+
     deleteUser: async (req: Request, res: Response) => {
         const { email } = req.body;
 
@@ -58,14 +90,13 @@ const authController = {
         }
     },
 
-
     checkSession: async (req: Request, res: Response) => {
         try {
             // Checking if a session which contains user data exists
             if (!req.user) {
                 return res.status(200).json({ success: false });
             } else {
-                return res.status(200).json({ 
+                return res.status(200).json({
                     success: true,
                     session: req.user
                 });
@@ -73,9 +104,19 @@ const authController = {
         } catch (error) {
             handleError(res, error);
         }
+    },
+    success: async (req: Request, res: Response) => {
+        res.json({
+            message: "You have been sucessfully logged into our ecosystem",
+            success: true
+        })
+    },
+    error: async (req: Request, res: Response) => {
+        res.json({
+            message: "An error has occured! Please contact DailySAT executive team to get this sorted right away!",
+            success: true
+        })
     }
 }
 
 export default authController;
-
-

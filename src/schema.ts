@@ -4,7 +4,6 @@ import { serial, text, timestamp, pgTable, boolean, integer, index } from "drizz
 export const user = pgTable("user", {
   email: text("email").primaryKey(), // Make email the primary key
   name: text("name").notNull(),
-  password: text("password").notNull(),
   googleId: text("googleId").notNull(),
 });
 
