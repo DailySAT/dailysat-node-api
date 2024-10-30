@@ -46,12 +46,6 @@ app.use(session({
         httpOnly: true, // So only a server is able to access the cookie within request headers (no JS scripts)
         secure: process.env.NODE_ENV === 'production', // Set to true in production
         maxAge: 1000 * 60 * 60 * 24 * 365 * 7,
-    },
-    genid: (req) => {
-        const email = req.body.email || 'default_email'; // Use a default value if email is not provided
-        const hmac = crypto.createHmac('sha256', process.env.SECRET_KEY || 'default');
-        hmac.update(email);
-        return hmac.digest('hex');
     }
 }));
 
