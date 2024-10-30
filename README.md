@@ -1,7 +1,3 @@
-Here’s how you can embed the link in your README so that it displays directly:
-
----
-
 # 🧐 DailySAT API
 
 **Overview:** The DailySat API powers the backend of the DailySat web platform, developed with ReactJS and TypeScript using the ViteJS buildpack.
