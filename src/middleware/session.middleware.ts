@@ -9,7 +9,7 @@ export const authenticateSession = (req: Request, res: Response, next: NextFunct
         next()
     } else {
         return res.status(401).json({
-            message: 'You are currently not authenticated! Please log in and try to access this resource again.',
+            message: 'You are currently not authenticated! Please log in and try again.',
             error: 'no-auth',
         });
     }
