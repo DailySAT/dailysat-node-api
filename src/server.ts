@@ -56,16 +56,14 @@ app.use(passport.session());
 
 // making sure that we are using the correct http method when building our callback url
 const apiUrl = process.env.API_URL || "";
-const protocol = apiUrl.startsWith('https://') ? 'https' : 'http';
 
-const callbackURL = `${protocol}://${apiUrl}/auth/callback`;
+const callbackURL = `https://${apiUrl}/auth/callback`;
 
 // this ensures that we can use the google sso login as it is now configured for use
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID || "",
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     callbackURL: callbackURL,
-    passReqToCallback: true
   },
   async (
     // even though we are not using these

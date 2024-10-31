@@ -13,7 +13,7 @@ const authController = {
     callBack: async (req: Request, res: Response) => {
         passport.authenticate('google', { failureRedirect: '/auth/error' }, async (err: any, profile: any) => {
             if (err || !profile) {
-                return res.redirect('/auth/google/error');
+                return res.redirect(`/auth/error?error=${err.code}`)
             }
 
             try {
@@ -35,7 +35,7 @@ const authController = {
                     if (loginErr) {
                         return res.status(500).json({ message: 'Login failed', error: loginErr.message });
                     }
-                    res.redirect('/auth/success'); // Redirecting to success page
+                    res.redirect('/success'); // Redirecting to success page
                 });
             } catch (error) {
                 handleError(res, error);
@@ -112,9 +112,13 @@ const authController = {
         })
     },
     error: async (req: Request, res: Response) => {
+
+        const { error } = req.query;
+
         res.json({
             message: "An error has occured! Please contact DailySAT executive team to get this sorted right away!",
-            success: true
+            success: true,
+            error: error
         })
     }
 }
