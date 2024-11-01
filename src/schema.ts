@@ -4,7 +4,7 @@ import { serial, text, timestamp, pgTable, integer, index } from "drizzle-orm/pg
 export const user = pgTable("user", {
   email: text("email").primaryKey(), // make email the primary key
   name: text("name").notNull(),
-  googleId: text("googleId").notNull(),
+  googleid: text("googleid").notNull(),
 });
 
 

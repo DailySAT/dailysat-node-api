@@ -13,32 +13,7 @@ const authController = {
     callBack: async (req: Request, res: Response) => {
         passport.authenticate('google', { failureRedirect: '/auth/error' }, async (err: any, profile: any) => {
             if (err || !profile) {
-                return res.redirect(`/auth/error?error=${err.code}`)
-            }
-
-            try {
-                // Check if the user already exists in the database
-                const existingUser = await db.select().from(user).where(eq(user.email, profile.emails[0].value)).execute();
-
-                if (existingUser.length > 0) {
-                    console.log('Google user already exists in DB..');
-                } else {
-                    console.log('Registering new Google user..');
-                    await db.insert(user).values({
-                        email: profile.emails[0].value,
-                        name: profile.displayName,
-                        googleId: profile.id
-                    }).execute();
-                }
-
-                req.login(profile, (loginErr) => {
-                    if (loginErr) {
-                        return res.status(500).json({ message: 'Login failed', error: loginErr.message });
-                    }
-                    res.redirect('/success'); // Redirecting to success page
-                });
-            } catch (error) {
-                handleError(res, error);
+                return res.json({err})
             }
         })(req, res);
     },

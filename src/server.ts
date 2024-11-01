@@ -81,7 +81,7 @@ passport.use(new GoogleStrategy({
       const existingUser = await db
         .select()
         .from(user)
-        .where(eq(user.googleId, profile.id))
+        .where(eq(user.googleid, profile.id))
         .limit(1)
         .execute();
 
@@ -91,7 +91,7 @@ passport.use(new GoogleStrategy({
         const newUserData: User = {
           name: profile.displayName,
           email: profile.emails[0].value,
-          googleId: profile.id,
+          googleid: profile.id,
         };
 
         // building a new db entry into our sql db 
