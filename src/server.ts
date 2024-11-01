@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-dotenv.config();
 
 import { User } from './types/User.js';
 import express from 'express';
@@ -53,6 +52,10 @@ app.use(passport.initialize())
 
 // this method is used to ensure that passport knows we are using sessions
 app.use(passport.session());
+
+// this way we can use environmental variables within our code
+dotenv.config();
+
 
 // making sure that we are using the correct http method when building our callback url
 const apiUrl = process.env.API_URL || "";
