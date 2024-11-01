@@ -109,13 +109,6 @@ passport.use(new GoogleStrategy({
   }
 ));
 
-passport.serializeUser((user, done) => {
-    return done(null, user)
-})
-
-passport.deserializeUser((user, done) => {
-    return done(null, user as User);
-})
 // Setup routing
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);

@@ -7,19 +7,39 @@ import passport from 'passport';
 
 const authController = {
     login: (req: Request, res: Response) => {
-        passport.authenticate('google', { scope: ['profile', 'email'] })(req, res);
+
+        if (!req.session.user) {
+            passport.authenticate('google', { scope: ['profile', 'email'] })(req, res);
+        } else {
+            return res.json({
+                message: "You are already logged in, so no need to log in again!",
+                error: "already-authenticated"
+            })
+        }
     },
 
     callBack: async (req: Request, res: Response) => {
         passport.authenticate('google', { failureRedirect: '/auth/error' }, async (err: any, profile: any) => {
             if (err || !profile) {
                 return res.json({err})
+            } else {
+                req.session.user = { email: profile.email };
+                return res.redirect('/auth/success')
             }
         })(req, res);
+        
     },
 
     logOut: (req: Request, res: Response) => {
-        if (!req.isAuthenticated()) {
+        if (req.session) {
+            req.session.destroy((err) => {
+                if (!err) {
+                    res.redirect('/auth/success')
+                } else {
+                    res.redirect('/auth/error?error="Authentication Error from Express Session')
+                }
+              })        
+            } else {
             return res.status(400).json({
                 message: "User is not logged in and therefore cannot be logged out",
                 error: "not-authenticated"
@@ -68,7 +88,7 @@ const authController = {
     checkSession: async (req: Request, res: Response) => {
         try {
             // Checking if a session which contains user data exists
-            if (!req.user) {
+            if (!req.session) {
                 return res.status(200).json({ success: false });
             } else {
                 return res.status(200).json({
