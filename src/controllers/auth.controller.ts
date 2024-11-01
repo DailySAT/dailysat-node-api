@@ -1,132 +1,63 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import { cluster } from '../libs/redis.js';
 import { db } from '../utils/db.js';
 import { user } from '../schema.js';
-import { and, eq } from 'drizzle-orm';
-import { generateCode } from '../libs/generateCode.js';
+import { eq } from 'drizzle-orm';
 import handleError from '../libs/handleError.js';
-
-const saltRounds = 10;
+import passport from 'passport';
 
 const authController = {
-    registerEmail: async (req: Request, res: Response) => {
-        const { name, email, password } = req.body;
+    login: (req: Request, res: Response) => {
 
-        try {
-            // Check if a user with the given email already exists
-            const existingUser = await db
-                .select()
-                .from(user)
-                .where(eq(user.email, email))
-                .limit(1)
-                .execute(); // Execute the query
-
-            if (existingUser.length > 0) {
-                return res.status(400).json({
-                    message: "Email already in use",
-                    error: "email-in-use"
-                });
-            }
-
-            // Hash the password (for security reasons)
-            const hash = await bcrypt.hash(password, saltRounds);
-
-            // Create a new user
-            await db
-                .insert(user)
-                .values({
-                    name,
-                    email,
-                    password: hash,
-                    isVerified: false,
-                })
-                .execute(); // Execute the insertion
-            
-            // Generate a code
-            await generateCode(email, 'verify');
-
-            // Send response
-            res.status(201).json({
-                message: 'User registered successfully',
-            });
-        } catch (error) {
-            handleError(res, error);
+        if (!req.session.user) {
+            passport.authenticate('google', { scope: ['profile', 'email'] })(req, res);
+        } else {
+            return res.json({
+                message: "You are already logged in, so no need to log in again!",
+                error: "already-authenticated"
+            })
         }
     },
 
-    loginEmail: async (req: Request, res: Response) => {
-        const { email, password } = req.body;
-
-        try {
-            // Find user by email
-            const foundUser = await db
-                .select()
-                .from(user)
-                .where(eq(user.email, email))
-                .limit(1)
-                .execute(); // Execute the query
-
-            const userObject = foundUser[0];
-
-            // Make sure user is not null (meaning there is no record of it in the db)
-            if (!userObject) {
-                return res.status(401).json({
-                    message: "There is no such user in our db system",
-                    error: "no-err-user"
-                });
-            }
-
-            if (!userObject.isVerified) {
-                return res.status(401).json({
-                    message: 'User is not verified yet. Verify your email and check your email.',
-                    error: 'invalid-verification'
-                });
-            }
-
-            // Compare the plain password with the hashed password in the database
-            const match = await bcrypt.compare(password, userObject.password || "");
-
-            if (match) {
-                // Set user session if match is true
-                req.session.user = { email: userObject.email || "" };
-
-                // Sending response back to the client codebase
-                return res.status(200).json({
-                    message: 'Login successful',
-                    session: req.session.user
-                });
+    callBack: async (req: Request, res: Response) => {
+        passport.authenticate('google', { failureRedirect: '/auth/error' }, async (err: any, profile: any) => {
+            if (err || !profile) {
+                return res.json({err})
             } else {
-                return res.status(401).json({
-                    message: 'Invalid email or password',
-                    error: 'invalid-credentials'
-                });
+                req.session.user = { email: profile.email };
+                return res.redirect('/auth/success')
             }
-        } catch (error) {
-            handleError(res, error);
-        }
+        })(req, res);
+        
     },
 
     logOut: (req: Request, res: Response) => {
-        if (!req.session) {
-            return res.status(500).json({
+        if (req.session) {
+            req.session.destroy((err) => {
+                if (!err) {
+                    res.redirect('/auth/success')
+                } else {
+                    res.redirect('/auth/error?error="Authentication Error from Express Session')
+                }
+              })        
+            } else {
+            return res.status(400).json({
                 message: "User is not logged in and therefore cannot be logged out",
-                error: "no-session-id"
+                error: "not-authenticated"
             });
         }
 
-        req.session.destroy((err) => {
-            if (!err) {
-                res.status(200).json({
-                    message: "Logged user out and killed session from express-session and redis"
-                });
-            } else {
+        req.logout((err) => {
+            if (err) {
                 console.error(err);
-                res.status(500).json({
+                return res.status(500).json({
                     message: "Error occurred while logging out",
                     error: err.message,
                 });
             }
+
+            res.status(200).json({
+                message: "Successfully logged out"
+            });
         });
     },
 
@@ -154,139 +85,36 @@ const authController = {
         }
     },
 
-    generateCode: async (req: Request, res: Response) => {
-        const { email, type } = req.body;
-
-        try {
-            await generateCode(email, type);
-
-            if (type !== "verify" && type !== "reset") {
-                return res.status(500).json({
-                    message: "The type is invalid. It must be either 'verify' or 'reset'.",
-                    error: "no-valid-type"
-                });
-            }
-
-            // Only need the user db object when generating a verification code, otherwise it is a wasted db call (efficiency)
-            if (type === "verify") {
-                const userFromDB = await db
-                    .select()
-                    .from(user)
-                    .where(eq(user.email, email))
-                    .limit(1)
-                    .execute(); // Execute the query
-
-                if (userFromDB.length === 0) {
-                    return res.status(400).json({
-                        message: "There is no such user. Invalid email provided",
-                        error: "no-user-exist"
-                    });
-                }
-            }
-            
-            return res.json({
-                message: "Token is sent to the user"   
-            });
-        } catch (error) {
-            handleError(res, error);
-        }
-    },
-
-    verifyEmail: async (req: Request, res: Response) => {
-        const { email, code } = req.body;
-
-        try {
-            cluster.get(`verify:${email}`, async (err, result) => {
-                if (err) {
-                    return res.status(500).json({
-                        message: 'Error retrieving verification code from cache',
-                        error: err.message,
-                    });
-                }
-
-                if (result === code) {
-                    // Removing token from cache so it cannot be used again
-                    await cluster.del(`verify:${email}`);
-
-                    await db
-                        .update(user)
-                        .set({ isVerified: true })
-                        .where(
-                            and(
-                                eq(user.email, email),
-                                eq(user.isVerified, false)
-                            )
-                        )
-                        .execute(); // Execute the update
-
-                    return res.status(200).json({
-                        message: "User's email has been verified! They may log in now."
-                    });
-                } else {
-                    return res.status(401).json({
-                        message: "Code is not valid, please input better code",
-                        error: "invalid-code-error"
-                    });
-                }
-            });
-        } catch (error) {
-            handleError(res, error);
-        }
-    },
-
-    resetPassword: async (req: Request, res: Response) => {
-        const { code, email, newPassword } = req.body;
-
-        try {
-            const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-            cluster.get(`reset:${email}`, async (err, result) => {
-                if (err) {
-                    return res.status(500).json({
-                        message: 'Error retrieving reset code from cache',
-                        error: err.message,
-                    });
-                }
-
-                if (result === code) {
-                    // Removing token from cache so it cannot be used again
-                    await cluster.del(`reset:${email}`);
-
-                    await db
-                        .update(user)
-                        .set({ password: hashedPassword })
-                        .where(eq(user.email, email))
-                        .execute(); // Execute the update
-
-                    return res.status(200).json({
-                        message: "User has changed their password successfully"
-                    });
-                } else {
-                    return res.status(401).json({
-                        message: "Code is not valid, please input better code",
-                        error: "invalid-code-error"
-                    });
-                }
-            });
-        } catch (error) {
-            handleError(res, error);
-        }
-    },
-
     checkSession: async (req: Request, res: Response) => {
         try {
             // Checking if a session which contains user data exists
-            if (!req.session.user) {
+            if (!req.session) {
                 return res.status(200).json({ success: false });
             } else {
-                return res.status(200).json({ 
+                return res.status(200).json({
                     success: true,
-                    session: req.session.user
+                    session: req.user
                 });
             }
         } catch (error) {
             handleError(res, error);
         }
+    },
+    success: async (req: Request, res: Response) => {
+        res.json({
+            message: "You have been sucessfully logged into our ecosystem",
+            success: true
+        })
+    },
+    error: async (req: Request, res: Response) => {
+
+        const { error } = req.query;
+
+        res.json({
+            message: "An error has occured! Please contact DailySAT executive team to get this sorted right away!",
+            success: true,
+            error: error
+        })
     }
 }
 
