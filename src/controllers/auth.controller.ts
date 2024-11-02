@@ -58,8 +58,8 @@ const authController = {
             } else {
                 // Handle unexpected status codes
                 return res.status(500).json({
-                    message: "An unknown error has occurred. Contact DailySAT team.",
-                    error: "unknown-code"
+                    message: "Internal server error. An unexpected error in the Google OAuth systems",
+                    error: "google-error"
                 });
             }
         } catch (error: any) {
