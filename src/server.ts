@@ -20,6 +20,8 @@ app.use(express.json());
 
 // CORS middleware
 app.use(cors({
+
+    // credentials must be true so cookies can be sent to the frontend endpoint (for session based auth) 
     credentials: true
 }));
 
