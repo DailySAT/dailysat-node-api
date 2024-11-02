@@ -158,7 +158,6 @@ const authController = {
 
         res.json({
             message: "An error has occured! Please contact DailySAT executive team to get this sorted right away!",
-            success: true,
             error: error
         })
     }
