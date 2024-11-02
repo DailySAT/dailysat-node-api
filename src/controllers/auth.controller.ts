@@ -3,33 +3,82 @@ import { db } from '../utils/db.js';
 import { user } from '../schema.js';
 import { eq } from 'drizzle-orm';
 import handleError from '../libs/handleError.js';
-import passport from 'passport';
+import dotenv from 'dotenv'
+import axios from 'axios';
+
+dotenv.config()
 
 const authController = {
-    login: (req: Request, res: Response) => {
-
-        if (!req.session.user) {
-            passport.authenticate('google', { scope: ['profile', 'email'] })(req, res);
-        } else {
-            return res.json({
+    login: async (req: Request, res: Response) => {
+        const { access_token } = req.query;
+    
+        if (req.session.user) {
+            return res.status(200).json({
                 message: "You are already logged in, so no need to log in again!",
                 error: "already-authenticated"
-            })
+            });
+        }
+    
+        try {
+            const response = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo`, {
+                headers: { Authorization: `Bearer ${access_token}` }
+            });
+    
+            // If the response is 200, process the user information
+            if (response.status === 200) {
+                const userEmail = response.data.email;
+                const userObj = await db
+                    .select()
+                    .from(user)
+                    .where(eq(user.email, userEmail))
+                    .execute();
+    
+                // If user does not exist, add them to the database
+                if (!userObj[0]) {
+                    await db
+                        .insert(user)
+                        .values({
+                            email: userEmail,
+                            name: response.data.name,
+                            googleid: response.data.id
+                        });
+                }
+    
+                // Build a new session as the user has been verified by Google
+                req.session.user = { email: userEmail };
+    
+                return res.status(200).json({
+                    message: "Successfully logged into DailySAT Platforms",
+                    user: {
+                        email: userEmail,
+                        name: response.data.name,
+                        googleid: response.data.id
+                    }
+                });
+            } else {
+                // Handle unexpected status codes
+                return res.status(500).json({
+                    message: "An unknown error has occurred. Contact DailySAT team.",
+                    error: "unknown-code"
+                });
+            }
+        } catch (error: any) {
+            if (error.response && error.response.status === 401) {
+                // 401 means the token is invalid
+                return res.status(401).json({
+                    message: "Invalid token given by Google login",
+                    error: "invalid-token-given"
+                });
+            } else {
+                // Handle other errors (e.g., network errors)
+                return res.status(500).json({
+                    message: "An error occurred while processing your request.",
+                    error: "server-error"
+                });
+            }
         }
     },
-
-    callBack: async (req: Request, res: Response) => {
-        passport.authenticate('google', { failureRedirect: '/auth/error' }, async (err: any, profile: any) => {
-            if (err || !profile) {
-                return res.json({err})
-            } else {
-                req.session.user = { email: profile.email };
-                return res.redirect('/auth/success')
-            }
-        })(req, res);
-        
-    },
-
+    
     logOut: (req: Request, res: Response) => {
         if (req.session) {
             req.session.destroy((err) => {
@@ -88,23 +137,20 @@ const authController = {
     checkSession: async (req: Request, res: Response) => {
         try {
             // Checking if a session which contains user data exists
-            if (!req.session) {
-                return res.status(200).json({ success: false });
-            } else {
+            if (req.session) {
                 return res.status(200).json({
                     success: true,
                     session: req.user
-                });
+                });           
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    session: "none"
+                })
             }
         } catch (error) {
             handleError(res, error);
         }
-    },
-    success: async (req: Request, res: Response) => {
-        res.json({
-            message: "You have been sucessfully logged into our ecosystem",
-            success: true
-        })
     },
     error: async (req: Request, res: Response) => {
 
