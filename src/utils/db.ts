@@ -11,6 +11,8 @@ import * as schema from '../schema.js';
 
 // Using pg's connection pooling so the API does not have to keep creating new connections to the db instance (adds to performance)
 
+// you could also have the db host a pooling system externally (I have done that too) 
+
 export const pool = new Pool({
     connectionString: process.env.DATABASE_URL as string
 })
