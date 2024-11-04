@@ -20,11 +20,13 @@ const authController = {
         }
     
         try {
+            // getting the response from googleapis based on the token given
+            // using axios to make the api request calls
             const response = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo`, {
                 headers: { Authorization: `Bearer ${access_token}` }
             });
     
-            // If the response is 200, process the user information
+            // If the response is 200, process the user information as the token is valid
             if (response.status === 200) {
                 const userEmail = response.data.email;
                 const userObj = await db
@@ -47,7 +49,7 @@ const authController = {
                 // Build a new session as the user has been verified by Google
                 req.session.user = { email: userEmail };
     
-                return res.status(200).json({
+                return res.json({
                     message: "Successfully logged into DailySAT Platforms",
                     user: {
                         email: userEmail,
@@ -55,12 +57,13 @@ const authController = {
                         googleid: response.data.id
                     }
                 });
-            } else {
-                // Handle unexpected status codes
-                return res.status(500).json({
-                    message: "Internal server error. An unexpected error in the Google OAuth systems",
-                    error: "google-error"
-                });
+            } 
+
+            else if (response.status == 401) {
+                return res.json({
+                    message: "Invalid Google token id",
+                    error: "no-valid-token"
+                })
             }
         } catch (error: any) {
             if (error.response && error.response.status === 401) {
