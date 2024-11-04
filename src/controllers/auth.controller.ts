@@ -110,7 +110,6 @@ const authController = {
         const { email } = req.session.user;
 
         try {
-            if (req.session && req.session.user && req.session.user.email === email) {
                 await db
                     .delete(user)
                     .where(eq(user.email, email))
@@ -119,12 +118,7 @@ const authController = {
                 res.status(200).json({
                     message: "User deleted successfully"
                 });
-            } else {
-                return res.status(401).json({
-                    message: "You do not have access to update this user",
-                    error: "no-auth-access"
-                });
-            }
+            
         } catch (error) {
             handleError(res, error);
         }
