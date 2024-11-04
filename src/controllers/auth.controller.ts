@@ -106,7 +106,7 @@ const authController = {
     },
 
     deleteUser: async (req: Request, res: Response) => {
-        const { email } = req.body;
+        const { email } = req.session.user;
 
         try {
             if (req.session && req.session.user && req.session.user.email === email) {
