@@ -66,51 +66,43 @@ const authController = {
                 })
             }
         } catch (error: any) {
-            if (error.response && error.response.status === 401) {
-                // 401 means the token is invalid
-                return res.status(401).json({
-                    message: "Invalid token given by Google login",
-                    error: "invalid-token-given"
-                });
-            } else {
-                // Handle other errors (e.g., network errors)
-                return res.status(500).json({
-                    message: "An error occurred while processing your request.",
-                    error: "server-error"
-                });
-            }
+            handleError(res, error);
         }
     },
     
     logOut: (req: Request, res: Response) => {
-        if (req.session) {
-            req.session.destroy((err) => {
-                if (!err) {
-                    res.redirect('/auth/success')
+        try {
+            if (req.session) {
+                req.session.destroy((err) => {
+                    if (!err) {
+                        res.redirect('/auth/success')
+                    } else {
+                        res.redirect('/auth/error?error="Authentication Error from Express Session')
+                    }
+                  })        
                 } else {
-                    res.redirect('/auth/error?error="Authentication Error from Express Session')
-                }
-              })        
-            } else {
-            return res.status(400).json({
-                message: "User is not logged in and therefore cannot be logged out",
-                error: "not-authenticated"
-            });
-        }
-
-        req.logout((err) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).json({
-                    message: "Error occurred while logging out",
-                    error: err.message,
+                return res.status(400).json({
+                    message: "User is not logged in and therefore cannot be logged out",
+                    error: "not-authenticated"
                 });
             }
-
-            res.status(200).json({
-                message: "Successfully logged out"
+    
+            req.logout((err) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).json({
+                        message: "Error occurred while logging out",
+                        error: err.message,
+                    });
+                }
+    
+                res.status(200).json({
+                    message: "Successfully logged out"
+                });
             });
-        });
+        } catch(error:any) {
+            handleError(res, error);
+        }
     },
 
     deleteUser: async (req: Request, res: Response) => {
