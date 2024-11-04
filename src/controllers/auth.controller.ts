@@ -86,20 +86,7 @@ const authController = {
                     error: "not-authenticated"
                 });
             }
-    
-            req.logout((err) => {
-                if (err) {
-                    console.error(err);
-                    return res.status(500).json({
-                        message: "Error occurred while logging out",
-                        error: err.message,
-                    });
-                }
-    
-                res.status(200).json({
-                    message: "Successfully logged out"
-                });
-            });
+       
         } catch(error:any) {
             handleError(res, error);
         }
