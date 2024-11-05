@@ -26,47 +26,45 @@ const authController = {
                 headers: { Authorization: `Bearer ${access_token}` }
             });
     
-            // If the response is 200, process the user information as the token is valid
-            if (response.status === 200) {
-                const userEmail = response.data.email;
-                const userObj = await db
-                    .select()
-                    .from(user)
-                    .where(eq(user.email, userEmail))
-                    .execute();
+            const userEmail = response.data.email;
+            const userObj = await db
+                .select()
+                .from(user)
+                .where(eq(user.email, userEmail))
+                .execute();
     
-                // If user does not exist, add them to the database
-                if (!userObj[0]) {
-                    await db
-                        .insert(user)
-                        .values({
-                            email: userEmail,
-                            name: response.data.name,
-                            googleid: response.data.id
-                        });
-                }
-    
-                // Build a new session as the user has been verified by Google
-                req.session.user = { email: userEmail };
-    
-                return res.json({
-                    message: "Successfully logged into DailySAT Platforms",
-                    user: {
+            // If user does not exist, add them to the database
+            if (!userObj[0]) {
+                await db
+                    .insert(user)
+                    .values({
                         email: userEmail,
                         name: response.data.name,
                         googleid: response.data.id
-                    }
-                });
-            } 
-
-            else if (response.status == 401) {
-                return res.json({
-                    message: "Invalid Google token id",
-                    error: "no-valid-token"
-                })
+                    });
             }
+    
+            // Build a new session as the user has been verified by Google
+            req.session.user = { email: userEmail };
+    
+            return res.json({
+                message: "Successfully logged into DailySAT Platforms",
+                user: {
+                    email: userEmail,
+                    name: response.data.name,
+                    googleid: response.data.id
+                }
+            });
         } catch (error: any) {
-            handleError(res, error);
+
+            if (error.status == 401) {
+                return res.status(500).json({
+                    message: "Invalid Google token (not authenticated 401)",
+                    error: "invalid-token"
+                })
+            } else {
+                handleError(res, error);
+            }
         }
     },
     
