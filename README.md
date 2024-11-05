@@ -34,6 +34,6 @@ Houses code that runs before any other logic in an endpoint, useful for pre-proc
 
 ## 📝 Endpoint Docs:
 
-To explore the different endpoints and their intended use cases, please navigate to the route `/api-docs`.
+To explore the different endpoints and their intended use cases, please navigate to the route `/api-docs` from the api endpoint.
 
 [Database ER Diagram](https://drive.google.com/file/d/1Y9Yu9_crEV4aN3SZ9a_vSYKdIGGY7dxm/preview)
