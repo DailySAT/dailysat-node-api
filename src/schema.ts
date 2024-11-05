@@ -8,7 +8,7 @@ export const user = pgTable("user", {
 });
 
 
-export const post = pgTable("post", {
+export const questions = pgTable("questions", {
   id: serial("id").primaryKey(), // id field here is the primary key (sql reference to this field when creating one-to-one or one-to-many relationships)
   title: text("title").notNull(),
   optionA: text("option_a").notNull(),
@@ -29,7 +29,7 @@ export const post = pgTable("post", {
 export const editorial = pgTable("editorial", {
   id: serial("id").primaryKey(),
   // Foriegn key that connects the question to the editorial
-  questionId: integer("question_id").notNull().references(() => post.id),
+  questionId: integer("question_id").notNull().references(() => questions.id),
   body: text("body").notNull(),
 
   // Is optional so not .notNull()

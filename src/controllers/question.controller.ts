@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { db } from '../utils/db.js';
-import { editorial, post } from '../schema.js';
+import { editorial, questions } from '../schema.js';
 import { eq, sql } from 'drizzle-orm';
 import handleError from '../libs/handleError.js';
 
@@ -22,8 +22,8 @@ const indexController = {
             // Fetch a random question based on the provided type
             const randomQuestion = await db
                 .select()
-                .from(post)
-                .where(eq(post.topicID, type as string))
+                .from(questions)
+                .where(eq(questions.topicID, type as string))
                 .orderBy(sql`RANDOM()`)
                 .limit(1)
                 .execute();
