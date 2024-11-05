@@ -55,8 +55,8 @@ const indexController = {
                 .execute();
 
             res.json({
-                editorials,
-                message: "Sucessfully sent editorials"
+                message: "Sucessfully sent editorials",
+                editorials
             })
 
         } catch(err) {
