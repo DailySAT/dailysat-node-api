@@ -94,7 +94,7 @@ const authController = {
 
     deleteUser: async (req: Request, res: Response) => {
         // using the email from the session so that user can only delete account they are signed into
-        const { email } = req.session.user;
+        const {email}  = req.session.user;
 
         try {
                 await db
