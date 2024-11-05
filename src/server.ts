@@ -5,6 +5,9 @@ import session from 'express-session';
 import { redisClient } from './libs/redis.js';
 import cors from 'cors';
 import RedisStore from 'connect-redis';
+import dotenv from "dotenv"
+
+dotenv.config()
 
 // Server configuration
 const PORT = 3001;
@@ -20,7 +23,9 @@ app.use(express.json());
 
 // CORS middleware
 app.use(cors({
-
+    // the endpoint at which requests are allowed, any other place we will block it 
+    // this adds an extra layer of security as no other endpoint can request resources from this api so no bad actors (black-hat hackers) can ever gain access
+    origin: process.env.FRONTEND_URL as string,
     // credentials must be true so cookies can be sent to the frontend endpoint (for session based auth) 
     credentials: true
 }));
