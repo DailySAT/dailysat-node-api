@@ -56,7 +56,7 @@ const authController = {
                 }
             });
         } catch (error: any) {
-
+            // we check for 401 because that means an invalid token so we give a specialized error response and not generic
             if (error.status == 401) {
                 return res.status(500).json({
                     message: "Invalid Google token (not authenticated 401)",
