@@ -1,5 +1,5 @@
 {
-  "name": "scholary_backend",
+  "name": "dailysat_backend",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "Hemit Patel",
   "license": "MIT",
-  "description": "The official API for the Scholary platform",
+  "description": "The official API for the DailySAT platform",
   "dependencies": {
     "@prisma/client": "^5.17.0",
     "axios": "^1.7.3",
