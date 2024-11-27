@@ -13,7 +13,7 @@ const indexController = {
             if (
                 type !== "convention" &&
                 type !== "craft" &&
-                type !== "ideas" &&
+                type !== "idea" &&
                 type !== "information"
             ) {
                 return res.status(400).json({ message: "Invalid type specified." });

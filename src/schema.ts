@@ -16,8 +16,6 @@ export const questions = pgTable("questions", {
   optionC: text("option_c").notNull(),
   optionD: text("option_d").notNull(),
   correctAnswer: text("correct_answer").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
   topicID: text("topic").notNull()
 }, (table) => {
   return {
