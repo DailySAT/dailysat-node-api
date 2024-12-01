@@ -1,4 +1,4 @@
-# 🧐 DailySAT API
+# 🚀 DailySAT API
 
 **Overview:** The DailySat API powers the backend of the DailySat web platform, developed with ReactJS and TypeScript using the ViteJS buildpack.
 
